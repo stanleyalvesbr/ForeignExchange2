@@ -159,7 +159,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <BundleResource Include="Resources\switch.png" />
+    <BundleResource Include="Resources\converter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\changemoney.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

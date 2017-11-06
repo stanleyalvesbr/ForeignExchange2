@@ -82,7 +82,10 @@
                     Grid.Row="1"
                     Grid.RowSpan="2"
                     HeightRequest="40"
-                    Source="changemoney">
+                    Source="converter.png">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SwitchCommand}"/>
+                    </Image.GestureRecognizers>
                 </Image>
             </Grid>
 
