@@ -1,13 +1,16 @@
 ﻿using ForeignExchange.Models;
 using GalaSoft.MvvmLight.Command;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Forms;
 
 namespace ForeignExchange.ViewModels
 {
@@ -20,7 +23,11 @@ namespace ForeignExchange.ViewModels
         #region Attributes
 
         bool _isRunnig;
+        bool _isEnabled;
         string _result;
+        ObservableCollection<Rate> _rates;
+
+
 
         #endregion
 
@@ -28,13 +35,30 @@ namespace ForeignExchange.ViewModels
 
         public string Amount { get; set; }
 
-        public ObservableCollection<Rate> Rates { get; set; }
+        public ObservableCollection<Rate> Rates
+        {
+            get
+            {
+                return _rates;
+            }
+
+            set
+            {
+                if (_rates != value)
+                {
+                    _rates = value;
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(Rates)));
+                }
+            }
+        }
 
         public Rate SourceRate { get; set; }
 
         public Rate TargetRate { get; set; }
 
-        public bool IsRunnning
+        public bool IsRunning
         {
             get
             {
@@ -48,14 +72,49 @@ namespace ForeignExchange.ViewModels
                     _isRunnig = value;
                     PropertyChanged?.Invoke(
                         this,
-                        new PropertyChangedEventArgs(nameof(IsRunnning)));
+                        new PropertyChangedEventArgs(nameof(IsRunning)));
                 }
             }
         }
 
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled
+        {
+            get
+            {
+                return _isEnabled;
+            }
 
-        public string Result { get; set; }
+            set
+            {
+                if (_isEnabled != value)
+                {
+                    _isEnabled = value;
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(IsEnabled)));
+                }
+            }
+        }
+
+        public string Result
+        {
+            get
+            {
+                return _result;
+            }
+
+            set
+            {
+                if (_result != value)
+                {
+                    _result = value;
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(Result)));
+                }
+            }
+        }
+
 
         #endregion
 
@@ -71,9 +130,55 @@ namespace ForeignExchange.ViewModels
 
         
 
-        void Convert()
+        async void Convert()
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(Amount))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Error",
+                    "You must enter a value in amount",
+                    "Accept");
+                return;
+            }
+
+            decimal amount = 0;
+
+            if (!decimal.TryParse(Amount, out amount))
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                      "Error",
+                      "You must enter a numeric value in amount",
+                      "Accept");
+                return;
+            }
+
+            if (SourceRate == null)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                      "Error",
+                      "You must select a source rate.",
+                      "Accept");
+                return;
+            }
+
+            if (TargetRate == null)
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                      "Error",
+                      "You mustselect a target rate.",
+                      "Accept");
+                return;
+            }
+
+            var amountConverted = amount / 
+                                  (decimal)SourceRate.TaxRate * 
+                                  (decimal)TargetRate.TaxRate;
+            Result = string.Format(
+               "{0} {1} = {2} {3:C2}",
+               SourceRate.Code,
+               amount,
+               TargetRate.Code,
+               amountConverted);
         }
 
         #endregion
@@ -86,10 +191,38 @@ namespace ForeignExchange.ViewModels
         }
         #endregion
 
-        void LoadRates()
+        async void LoadRates()
         {
             IsRunning = true;
             Result = "Loading rates...";
+
+            try
+            {
+                var client = new HttpClient();
+                client.BaseAddress = new Uri("http://apiexchangerates.azurewebsites.net");
+                var controller = "/api/Rates";
+                var response = await client.GetAsync(controller);
+                var result = await response.Content.ReadAsStringAsync();
+                if(!response.IsSuccessStatusCode)
+                {
+                    IsRunning = false;
+                    Result = result;
+                }
+
+                var rates = JsonConvert.DeserializeObject<List<Rate>>(result);
+                Rates = new ObservableCollection<Rate>(rates);
+
+                IsRunning = false;
+                IsEnabled = true;
+                Result = "Ready to convert!";
+                
+
+            }
+            catch(Exception ex)
+            {
+                IsRunning = false;
+                Result = ex.Message;
+            }
 
         }
     }
