@@ -2,11 +2,17 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ForeignExchange.Views.MainView"
-             BackgroundColor="Yellow"
+             BackgroundColor="White"
              BindingContext="{Binding Main, Source={StaticResource Locator}}">
+    <ContentPage.Padding>
+        <OnPlatform 
+               x:TypeArguments="Thickness"
+               iOS="20,30,20,10"
+               Android="10"/>
+    </ContentPage.Padding>
     <ContentPage.Content>
-        <StackLayout
-             Padding="20,30,20,10"> <!--ES,DI,DS,DI ESQUERDA SUPERIOR, ESQUERDA INFERIOR, DIREITA SUPERIOR, DIREITA INFERIOR-->
+        <StackLayout>
+            <!--   Padding="20,30,20,10">ES,DI,DS,DI ESQUERDA SUPERIOR, ESQUERDA INFERIOR, DIREITA SUPERIOR, DIREITA INFERIOR-->
             <Label
                 FontAttributes="Bold"
                 FontSize="Large"
