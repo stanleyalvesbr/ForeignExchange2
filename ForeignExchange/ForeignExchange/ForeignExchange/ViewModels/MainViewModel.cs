@@ -1,4 +1,5 @@
-﻿using ForeignExchange.Models;
+﻿using ForeignExchange.Helpers;
+using ForeignExchange.Models;
 using GalaSoft.MvvmLight.Command;
 using Newtonsoft.Json;
 using System;
@@ -185,9 +186,9 @@ namespace ForeignExchange.ViewModels
             if (string.IsNullOrEmpty(Amount))
             {
                 await Application.Current.MainPage.DisplayAlert(
-                    "Error",
-                    "You must enter a value in amount",
-                    "Accept");
+                    Lenguages.Error,
+                    Lenguages.AmountValidation,
+                    Lenguages.Accept);
                 return;
             }
 
