@@ -1,15 +1,9 @@
 ﻿using ForeignExchange.Helpers;
 using ForeignExchange.Models;
 using GalaSoft.MvvmLight.Command;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 
@@ -21,6 +15,10 @@ namespace ForeignExchange.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         #endregion
 
+        #region Services
+        ApiService apiService;
+        #endregion
+
         #region Attributes
 
         bool _isRunnig;
@@ -29,6 +27,7 @@ namespace ForeignExchange.ViewModels
         ObservableCollection<Rate> _rates;
         Rate _sourceRate;
         Rate _targetRate;
+        string _status;
 
 
 
@@ -37,6 +36,25 @@ namespace ForeignExchange.ViewModels
         #region Properties
 
         public string Amount { get; set; }
+
+        public string Status
+        {
+            get
+            {
+                return _status;
+            }
+
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    PropertyChanged?.Invoke(
+                        this,
+                        new PropertyChangedEventArgs(nameof(Status)));
+                }
+            }
+        }
 
         public ObservableCollection<Rate> Rates
         {
@@ -152,6 +170,7 @@ namespace ForeignExchange.ViewModels
             }
         }
 
+       
 
         #endregion
 
@@ -197,27 +216,27 @@ namespace ForeignExchange.ViewModels
             if (!decimal.TryParse(Amount, out amount))
             {
                 await Application.Current.MainPage.DisplayAlert(
-                      "Error",
-                      "You must enter a numeric value in amount",
-                      "Accept");
+                      Lenguages.Error,
+                      Lenguages.NumericValue,
+                      Lenguages.Accept);
                 return;
             }
 
             if (SourceRate == null)
             {
                 await Application.Current.MainPage.DisplayAlert(
-                      "Error",
-                      "You must select a source rate.",
-                      "Accept");
+                      Lenguages.Error,
+                      Lenguages.SourceRate,
+                      Lenguages.Accept);
                 return;
             }
 
             if (TargetRate == null)
             {
                 await Application.Current.MainPage.DisplayAlert(
-                      "Error",
-                      "You mustselect a target rate.",
-                      "Accept");
+                      Lenguages.Error,
+                      Lenguages.TargetRate,
+                      Lenguages.Accept);
                 return;
             }
 
@@ -238,43 +257,41 @@ namespace ForeignExchange.ViewModels
         #region Constructors
         public MainViewModel()
         {
+            apiService = new ApiService();
             LoadRates();
         }
         #endregion
 
+        #region Methods
         async void LoadRates()
         {
             IsRunning = true;
-            Result = "Loading rates...";
+            Result = Lenguages.Loading ;
 
-            try
-            {
-                var client = new HttpClient();
-                client.BaseAddress = new Uri("http://apiexchangerates.azurewebsites.net");
-                var controller = "/api/Rates";
-                var response = await client.GetAsync(controller);
-                var result = await response.Content.ReadAsStringAsync();
-                if(!response.IsSuccessStatusCode)
-                {
-                    IsRunning = false;
-                    Result = result;
-                }
-
-                var rates = JsonConvert.DeserializeObject<List<Rate>>(result);
-                Rates = new ObservableCollection<Rate>(rates);
-
-                IsRunning = false;
-                IsEnabled = true;
-                Result = "Ready to convert!";
-                
-
-            }
-            catch(Exception ex)
+            var connection = await apiService.CheckConnection();
+            if (!connection.IsSucess)
             {
                 IsRunning = false;
-                Result = ex.Message;
+                Result = connection.Message;
+                return;
             }
 
+            var response = await apiService.GetList<Rate>(
+                     "http://apiexchangerates.azurewebsites.net",
+                           "/api/Rates");
+            if (!response.IsSucess)
+            {
+                IsRunning = false;
+                Result = response.Message;
+                return;
+            }
+
+            Rates = new ObservableCollection<Rate>((List<Rate>)response.Result);
+            IsRunning = false;
+            IsEnabled = true;
+            Result = Lenguages.ResultConvert;
+            Status = Lenguages.Status;
         }
+        #endregion
     }
 }

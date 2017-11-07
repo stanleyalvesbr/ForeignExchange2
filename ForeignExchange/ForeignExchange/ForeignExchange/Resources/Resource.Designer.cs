@@ -71,6 +71,24 @@ namespace ForeignExchange.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter the amount....
+        /// </summary>
+        internal static string Amounts {
+            get {
+                return ResourceManager.GetString("Amounts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amount :.
+        /// </summary>
+        internal static string Amountt {
+            get {
+                return ResourceManager.GetString("Amountt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You must enter a value in amount..
         /// </summary>
         internal static string AmountValidation {
@@ -85,6 +103,60 @@ namespace ForeignExchange.Resources {
         internal static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading rates....
+        /// </summary>
+        internal static string Loading {
+            get {
+                return ResourceManager.GetString("Loading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must enter a numeric value in amount.
+        /// </summary>
+        internal static string NumericValue {
+            get {
+                return ResourceManager.GetString("NumericValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result to convert.
+        /// </summary>
+        internal static string ResultConvert {
+            get {
+                return ResourceManager.GetString("ResultConvert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must select a source rate..
+        /// </summary>
+        internal static string SourceRate {
+            get {
+                return ResourceManager.GetString("SourceRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rates loader from internet..
+        /// </summary>
+        internal static string Status {
+            get {
+                return ResourceManager.GetString("Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must select a target rate..
+        /// </summary>
+        internal static string TargetRate {
+            get {
+                return ResourceManager.GetString("TargetRate", resourceCulture);
             }
         }
         

@@ -32,5 +32,47 @@
         {
             get { return Resource.Title; }
         }
+
+        
+        public static string NumericValue
+        {
+            get { return Resource.NumericValue; }
+        }
+        
+        public static string SourceRate
+        {
+            get { return Resource.SourceRate; }
+        }
+        
+        public static string TargetRate
+        {
+            get { return Resource.TargetRate; }
+        }
+
+        public static string Loading
+        {
+            get { return Resource.Loading; }
+        }
+
+        public static string ResultConvert
+        {
+            get { return Resource.ResultConvert; }
+        }
+
+        public static string Status
+        {
+            get { return Resource.Status; }
+        }
+
+        public static string Amounts
+        {
+            get { return Resource.Amounts; }
+        }
+
+        public static string Amountt
+        {
+            get { return Resource.Amountt; }
+        }
+
     }
 }
