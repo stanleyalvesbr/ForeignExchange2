@@ -7,6 +7,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 using Xamarin.Forms;
+using System;
+using System.Threading.Tasks;
 
 namespace ForeignExchange.ViewModels
 {
@@ -31,6 +33,7 @@ namespace ForeignExchange.ViewModels
         Rate _sourceRate;
         Rate _targetRate;
         string _status;
+        List<Rate> rates;
 
 
 
@@ -273,11 +276,40 @@ namespace ForeignExchange.ViewModels
             var connection = await apiService.CheckConnection();
             if (!connection.IsSucess)
             {
+                LoadLocalData();           
+            }
+            else
+            {
+                await LoadDataFromApi();
+            }
+
+            if (rates.Count == 0)
+            {
                 IsRunning = false;
-                Result = connection.Message;
+                IsEnabled = false;
+                Result = "There are not internet connection and not load "+ 
+                         "previously rates. Please try again with internet "+
+                         "connection.";//Lenguages.ResultConvert;
+               // Status = Lenguages.Status;
                 return;
             }
 
+            Rates = new ObservableCollection<Rate>(rates);
+
+            IsRunning = false;
+            IsEnabled = true;
+            //Result = Lenguages.ResultConvert;
+            Status = Lenguages.Status;
+        }
+
+        void LoadLocalData()
+        {
+            rates = dataService.Get<Rate>(false);
+            Status = "Rates loaded from local data.";
+        }
+
+        async Task LoadDataFromApi()
+        {
             var url = "http://apiexchangerates.azurewebsites.net"; // Application.Current.Resources["URLAPI"].ToString();
 
             var response = await apiService.GetList<Rate>(
@@ -285,22 +317,16 @@ namespace ForeignExchange.ViewModels
                            "/api/Rates");
             if (!response.IsSucess)
             {
-                IsRunning = false;
-                Result = response.Message;
+                LoadLocalData();
                 return;
             }
+            
 
             //Gravar os dados localmente
 
-            var rates = (List<Rate>)response.Result;
+            rates = (List<Rate>)response.Result;
             dataService.DeleteAll<Rate>();
             dataService.Save(rates);
-
-            Rates = new ObservableCollection<Rate>(rates);
-
-            IsRunning = false;
-            IsEnabled = true;
-            Result = Lenguages.ResultConvert;
             Status = Lenguages.Status;
         }
         #endregion
