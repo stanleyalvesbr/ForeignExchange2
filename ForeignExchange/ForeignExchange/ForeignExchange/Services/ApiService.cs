@@ -1,7 +1,6 @@
 ﻿namespace ForeignExchange
 {
     using System.Threading.Tasks;
-    using Models;
     using Plugin.Connectivity;
     using System.Net.Http;
     using System;
@@ -23,15 +22,15 @@
             }
 
 
-            var response = await CrossConnectivity.Current.IsRemoteReachable("google.com");
-            if (!response)
-            {
-                return new Response
-                {
-                    IsSucess = false,
-                    Message = "Check your Internet connection."
-                };
-            }
+            //var response = await CrossConnectivity.Current.IsRemoteReachable("google.com");
+            //if (!response)
+            //{
+            //    return new Response
+            //    {
+            //        IsSucess = false,
+            //        Message = "Check your Internet connection."
+            //    };
+            //}
             return new Response
             {
                 IsSucess = true,

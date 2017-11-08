@@ -1,5 +1,6 @@
 ﻿using ForeignExchange.Helpers;
 using ForeignExchange.Models;
+using ForeignExchange.Services;
 using GalaSoft.MvvmLight.Command;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +18,8 @@ namespace ForeignExchange.ViewModels
 
         #region Services
         ApiService apiService;
+        DialogService dialogService;
+        DataService dataService;
         #endregion
 
         #region Attributes
@@ -204,10 +207,9 @@ namespace ForeignExchange.ViewModels
         {
             if (string.IsNullOrEmpty(Amount))
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await dialogService.ShowMessage(
                     Lenguages.Error,
-                    Lenguages.AmountValidation,
-                    Lenguages.Accept);
+                    Lenguages.AmountValidation);
                 return;
             }
 
@@ -215,28 +217,25 @@ namespace ForeignExchange.ViewModels
 
             if (!decimal.TryParse(Amount, out amount))
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await dialogService.ShowMessage(
                       Lenguages.Error,
-                      Lenguages.NumericValue,
-                      Lenguages.Accept);
+                      Lenguages.NumericValue);
                 return;
             }
 
             if (SourceRate == null)
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await dialogService.ShowMessage(
                       Lenguages.Error,
-                      Lenguages.SourceRate,
-                      Lenguages.Accept);
+                      Lenguages.SourceRate);
                 return;
             }
 
             if (TargetRate == null)
             {
-                await Application.Current.MainPage.DisplayAlert(
+                await dialogService.ShowMessage(
                       Lenguages.Error,
-                      Lenguages.TargetRate,
-                      Lenguages.Accept);
+                      Lenguages.TargetRate);
                 return;
             }
 
@@ -244,7 +243,7 @@ namespace ForeignExchange.ViewModels
                                   (decimal)SourceRate.TaxRate * 
                                   (decimal)TargetRate.TaxRate;
             Result = string.Format(
-               "{0} {1} = {2} {3:C2}",
+               "{0} ${1:N2} = {2} ${3:N2}",
                SourceRate.Code,
                amount,
                TargetRate.Code,
@@ -258,6 +257,9 @@ namespace ForeignExchange.ViewModels
         public MainViewModel()
         {
             apiService = new ApiService();
+            dataService = new DataService();
+            dialogService = new DialogService();
+
             LoadRates();
         }
         #endregion
@@ -276,8 +278,10 @@ namespace ForeignExchange.ViewModels
                 return;
             }
 
+            var url = "http://apiexchangerates.azurewebsites.net"; // Application.Current.Resources["URLAPI"].ToString();
+
             var response = await apiService.GetList<Rate>(
-                     "http://apiexchangerates.azurewebsites.net",
+                         url,
                            "/api/Rates");
             if (!response.IsSucess)
             {
@@ -286,7 +290,14 @@ namespace ForeignExchange.ViewModels
                 return;
             }
 
-            Rates = new ObservableCollection<Rate>((List<Rate>)response.Result);
+            //Gravar os dados localmente
+
+            var rates = (List<Rate>)response.Result;
+            dataService.DeleteAll<Rate>();
+            dataService.Save(rates);
+
+            Rates = new ObservableCollection<Rate>(rates);
+
             IsRunning = false;
             IsEnabled = true;
             Result = Lenguages.ResultConvert;
